@@ -13,7 +13,13 @@ async function exists(module) {
 }
 
 export default async function resolveImports(module, root = true) {
-  const source = await readFile(module, "utf-8");
+  let source;
+
+  try {
+    source = await readFile(module, "utf-8");
+  } catch (error) {
+    return;
+  }
 
   const [imports] = await parse(source);
 
@@ -29,7 +35,10 @@ export default async function resolveImports(module, root = true) {
           modules.push(resolvedModule);
         }
         const graph = await resolveImports(resolvedModule, false);
-        graph.forEach((module) => modules.push(module));
+
+        if (graph) {
+          graph.forEach((module) => modules.push(module));
+        }
       }
     }),
   );
