@@ -14,12 +14,13 @@
   },
   "files": [
     "formatLinkRelation.mjs",
-    "formatLinkRelations.mjs",
+    "formatLinkHeaderRelations.mjs",
     "moduleGraph.mjs",
     "resolveLinkRelations.mjs",
     "resolveModule.mjs"
   ],
   "exports": {
+    "./formatLinkHeaderRelations.mjs": "./formatLinkHeaderRelations.mjs",
     "./resolveLinkRelations.mjs": "./resolveLinkRelations.mjs"
   },
   "scripts": {
