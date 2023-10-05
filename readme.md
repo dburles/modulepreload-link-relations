@@ -29,7 +29,7 @@ const linkRelations = await resolveLinkRelations({
   // The application path.
   appPath: "./app",
   // The requested module.
-  url: "http://localhost/lib/a.js",
+  url: "/lib/a.js",
 }); // => ['/lib/c.js', '/lib/d.js']
 
 // Optionally format the result:
