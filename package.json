@@ -1,0 +1,38 @@
+{
+  "name": "modulepreload-link-relations",
+  "version": "1.0.0",
+  "description": "Utility for generating modulepreload link relations based on a modules import graph.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dburles/modulepreload-link-relations.git"
+  },
+  "keywords": ["modulepreload", "link", "middleware", "esm"],
+  "author": "David Burles",
+  "license": "MIT",
+  "engines": {
+    "node": ">= 18"
+  },
+  "files": [
+    "formatLinkRelation.mjs",
+    "formatLinkRelations.mjs",
+    "moduleGraph.mjs",
+    "resolveLinkRelations.mjs",
+    "resolveModule.mjs"
+  ],
+  "exports": {
+    "./resolveLinkRelations.mjs": "./resolveLinkRelations.mjs"
+  },
+  "scripts": {
+    "eslint": "eslint .",
+    "prettier": "prettier -c .",
+    "test": "npm run eslint && npm run prettier",
+    "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3"
+  },
+  "dependencies": {
+    "es-module-lexer": "^1.3.1"
+  }
+}
