@@ -34,6 +34,7 @@ export default async function resolveImports(module, root = true) {
         if (!root) {
           modules.push(resolvedModule);
         }
+
         const graph = await resolveImports(resolvedModule, false);
 
         if (graph) {
