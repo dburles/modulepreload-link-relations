@@ -13,11 +13,11 @@
     "node": ">= 18"
   },
   "files": [
-    "formatLinkRelation.mjs",
+    "formatLinkHeaderRelation.mjs",
     "formatLinkHeaderRelations.mjs",
-    "moduleGraph.mjs",
-    "resolveLinkRelations.mjs",
-    "resolveModule.mjs"
+    "resolveImports.mjs",
+    "resolveImportsCached.mjs",
+    "resolveLinkRelations.mjs"
   ],
   "exports": {
     "./formatLinkHeaderRelations.mjs": "./formatLinkHeaderRelations.mjs",
