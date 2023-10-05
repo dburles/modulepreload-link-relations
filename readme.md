@@ -4,6 +4,12 @@ A utility for generating [modulepreload](https://developer.mozilla.org/en-US/doc
 
 It can be used for HTTP server middleware and generating [\<link\>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link) elements in static HTML.
 
+## Install
+
+```sh
+npm i modulepreload-link-relations
+```
+
 ## Usage
 
 This package exports two functions:
