@@ -30,8 +30,6 @@ const linkRelations = await resolveLinkRelations({
   appPath: "./app",
   // The requested module.
   url: "http://localhost/lib/a.js",
-  // Optional file extensions to parse.
-  extensions: ["mjs", "js"], // defaults
 }); // => ['/lib/c.js', '/lib/d.js']
 
 // Optionally format the result:
