@@ -21,6 +21,7 @@
   ],
   "exports": {
     "./formatLinkHeaderRelations.mjs": "./formatLinkHeaderRelations.mjs",
+    "./package.json": "./package.json",
     "./resolveLinkRelations.mjs": "./resolveLinkRelations.mjs"
   },
   "scripts": {
