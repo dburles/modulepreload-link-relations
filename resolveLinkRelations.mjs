@@ -3,8 +3,7 @@ import resolveImportsCached from "./resolveImportsCached.mjs";
 
 export default async function resolveLinkRelations({ appPath, url }) {
   const rootPath = path.resolve(appPath);
-  const file = url.slice(1);
-  const resolvedFile = path.resolve(rootPath, file);
+  const resolvedFile = path.join(rootPath, url);
 
   if (resolvedFile.startsWith(rootPath)) {
     const modules = await resolveImportsCached(resolvedFile);
