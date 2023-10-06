@@ -1,11 +1,10 @@
 import { parse } from "es-module-lexer";
-import { readFile } from "fs/promises";
 import path from "node:path";
-import fs from "node:fs/promises";
+import { readFile, access } from "node:fs/promises";
 
 async function exists(module) {
   try {
-    await fs.access(module);
+    await access(module);
     return true;
   } catch (error) {
     return false;
