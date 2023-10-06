@@ -1,6 +1,6 @@
 {
   "name": "modulepreload-link-relations",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Utility for generating modulepreload link relations based on a JavaScript module import graph.",
   "repository": {
     "type": "git",
