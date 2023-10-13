@@ -27,7 +27,8 @@
   "scripts": {
     "eslint": "eslint .",
     "prettier": "prettier -c .",
-    "test": "npm run eslint && npm run prettier",
+    "test": "npm run eslint && npm run prettier && npm run unit",
+    "unit": "node --test --experimental-test-coverage",
     "prepublishOnly": "npm test"
   },
   "devDependencies": {

@@ -26,18 +26,20 @@ export default async function resolveImports(module, root = true) {
 
   await Promise.all(
     imports.map(async ({ n: specifier }) => {
-      const resolvedModule = path.resolve(path.dirname(module), specifier);
-      const preloadable = await exists(resolvedModule);
+      if (specifier) {
+        const resolvedModule = path.resolve(path.dirname(module), specifier);
+        const preloadable = await exists(resolvedModule);
 
-      if (preloadable) {
-        if (!root) {
-          modules.push(resolvedModule);
-        }
+        if (preloadable) {
+          if (!root) {
+            modules.push(resolvedModule);
+          }
 
-        const graph = await resolveImports(resolvedModule, false);
+          const graph = await resolveImports(resolvedModule, false);
 
-        if (graph) {
-          graph.forEach((module) => modules.push(module));
+          if (graph) {
+            graph.forEach((module) => modules.push(module));
+          }
         }
       }
     }),
