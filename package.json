@@ -6,7 +6,12 @@
     "type": "git",
     "url": "git+https://github.com/dburles/modulepreload-link-relations.git"
   },
-  "keywords": ["modulepreload", "link", "middleware", "esm"],
+  "keywords": [
+    "modulepreload",
+    "link",
+    "middleware",
+    "esm"
+  ],
   "author": "David Burles",
   "license": "MIT",
   "engines": {
