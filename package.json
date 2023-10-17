@@ -31,14 +31,17 @@
   },
   "scripts": {
     "eslint": "eslint .",
+    "prepublishOnly": "npm test",
     "prettier": "prettier -c .",
-    "test": "npm run eslint && npm run prettier && npm run unit",
-    "unit": "node --test --test-reporter=spec --experimental-test-coverage",
-    "prepublishOnly": "npm test"
+    "test": "npm run eslint && npm run prettier && npm run types && npm run unit",
+    "types": "tsc -p jsconfig.json",
+    "unit": "node --test --test-reporter=spec --experimental-test-coverage"
   },
   "devDependencies": {
+    "@types/node": "^20.8.6",
     "eslint": "^8.50.0",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "es-module-lexer": "^1.3.1"

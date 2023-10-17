@@ -1,7 +1,19 @@
+// @ts-check
+
 import { parse } from "es-module-lexer";
 import path from "node:path";
 import { readFile, access } from "node:fs/promises";
 
+/**
+ * Resolved imports.
+ * @typedef {string[] | undefined} ResolvedImports
+ */
+
+/**
+ * Checks if a file exists.
+ * @param {string} module The path to the file.
+ * @returns {Promise<boolean>} Whether the file exists.
+ */
 async function exists(module) {
   try {
     await access(module);
@@ -11,8 +23,14 @@ async function exists(module) {
   }
 }
 
+/**
+ * Recursively parses and resolves a module's imports.
+ * @param {string} module The path to the module.
+ * @param {boolean} [root=true] Whether the module is the root module.
+ * @returns {Promise<ResolvedImports>} The resolved modules.
+ */
 export default async function resolveImports(module, root = true) {
-  let source;
+  let source = "";
 
   try {
     source = await readFile(module, "utf-8");
@@ -22,6 +40,7 @@ export default async function resolveImports(module, root = true) {
 
   const [imports] = await parse(source);
 
+  /** @type {Array<string>} */
   let modules = [];
 
   await Promise.all(
