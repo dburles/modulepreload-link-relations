@@ -10,7 +10,7 @@ export default async function resolveImportsCached(module) {
   } else {
     const graph = await resolveImports(module);
 
-    if (graph) {
+    if (graph?.length > 0) {
       cache.set(module, graph);
       return graph;
     }
