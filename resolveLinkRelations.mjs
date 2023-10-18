@@ -7,7 +7,7 @@ import resolveImportsCached from "./resolveImportsCached.mjs";
 
 /**
  * Resolves link relations for a given URL within an `appPath`.
- * @param {Object} options Options.
+ * @param {object} options Options.
  * @param {string} options.appPath The path to the app.
  * @param {string} options.url The module URL to resolve.
  * @returns {Promise<ResolvedImports>} The resolved modules.
