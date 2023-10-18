@@ -5,18 +5,13 @@ import path from "node:path";
 import { readFile, access } from "node:fs/promises";
 
 /**
- * Resolved imports.
- * @typedef {Array<string> | undefined} ResolvedImports
- */
-
-/**
  * Checks if a file exists.
- * @param {string} module The path to the file.
- * @returns {Promise<boolean>} Does the file exist.
+ * @param {string} filePath The path to the file.
+ * @returns Does the file exist.
  */
-async function exists(module) {
+async function exists(filePath) {
   try {
-    await access(module);
+    await access(filePath);
     return true;
   } catch (error) {
     return false;
@@ -27,22 +22,22 @@ async function exists(module) {
  * Recursively parses and resolves a module's imports.
  * @param {string} module The path to the module.
  * @param {boolean} [root] Whether the module is the root module.
- * @returns {Promise<ResolvedImports>} The resolved modules.
+ * @returns An array containing paths to modules that can be preloaded.
  */
 export default async function resolveImports(module, root = true) {
+  /** @type {Array<string>} */
+  let modules = [];
+
   /** @type {string | undefined} */
   let source;
 
   try {
     source = await readFile(module, "utf-8");
   } catch (error) {
-    return;
+    return modules;
   }
 
   const [imports] = await parse(source);
-
-  /** @type {Array<string>} */
-  let modules = [];
 
   await Promise.all(
     imports.map(async ({ n: specifier, d }) => {
@@ -58,7 +53,7 @@ export default async function resolveImports(module, root = true) {
 
           const graph = await resolveImports(resolvedModule, false);
 
-          if (graph?.length > 0) {
+          if (graph.length > 0) {
             graph.forEach((module) => modules.push(module));
           }
         }

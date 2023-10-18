@@ -3,14 +3,12 @@
 import path from "node:path";
 import resolveImportsCached from "./resolveImportsCached.mjs";
 
-/** @typedef {import("./resolveImports.mjs").ResolvedImports} ResolvedImports */
-
 /**
- * Resolves link relations for a given URL within an `appPath`.
+ * Resolves link relations for a given URL.
  * @param {object} options Options.
- * @param {string} options.appPath The path to the app.
+ * @param {string} options.appPath The path to the application root from where files can be read.
  * @param {string} options.url The module URL to resolve.
- * @returns {Promise<ResolvedImports>} The resolved modules.
+ * @returns An array containing relative paths to modules that can be preloaded.
  */
 export default async function resolveLinkRelations({ appPath, url }) {
   const rootPath = path.resolve(appPath);
@@ -24,7 +22,7 @@ export default async function resolveLinkRelations({ appPath, url }) {
         return "/" + path.relative(rootPath, module);
       });
 
-      if (resolvedModules?.length > 0) {
+      if (resolvedModules.length > 0) {
         return resolvedModules;
       }
     }
