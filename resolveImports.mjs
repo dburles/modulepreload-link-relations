@@ -6,13 +6,13 @@ import { readFile, access } from "node:fs/promises";
 
 /**
  * Resolved imports.
- * @typedef {string[] | undefined} ResolvedImports
+ * @typedef {Array<string> | undefined} ResolvedImports
  */
 
 /**
  * Checks if a file exists.
  * @param {string} module The path to the file.
- * @returns {Promise<boolean>} Whether the file exists.
+ * @returns {Promise<boolean>} Does the file exist.
  */
 async function exists(module) {
   try {
@@ -26,11 +26,12 @@ async function exists(module) {
 /**
  * Recursively parses and resolves a module's imports.
  * @param {string} module The path to the module.
- * @param {boolean} [root=true] Whether the module is the root module.
+ * @param {boolean} [root] Whether the module is the root module.
  * @returns {Promise<ResolvedImports>} The resolved modules.
  */
 export default async function resolveImports(module, root = true) {
-  let source = "";
+  /** @type {string | undefined} */
+  let source;
 
   try {
     source = await readFile(module, "utf-8");
