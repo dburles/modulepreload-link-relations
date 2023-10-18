@@ -29,8 +29,8 @@ const linkRelations = await resolveLinkRelations({
   // The application path.
   appPath: "./app",
   // The requested module.
-  url: "/lib/a.js",
-}); // => ['/lib/c.js', '/lib/d.js']
+  url: "/lib/a.js", // a.js imports b.js, b.js imports c.js, c.js imports d.js
+}); // => ['/lib/c.js', '/lib/d.js'] // Direct imports aren't included in the result.
 
 // Optionally format the result:
 const formattedLinkRelations = formatLinkHeaderRelations(linkRelations); // => </lib/c.js>; rel="modulepreload", </lib/d.js>; rel="modulepreload"
