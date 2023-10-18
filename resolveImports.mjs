@@ -44,8 +44,9 @@ export default async function resolveImports(module, root = true) {
   let modules = [];
 
   await Promise.all(
-    imports.map(async ({ n: specifier }) => {
-      if (specifier) {
+    imports.map(async ({ n: specifier, d }) => {
+      const dynamic = d > -1;
+      if (specifier && !dynamic) {
         const resolvedModule = path.resolve(path.dirname(module), specifier);
         const preloadable = await exists(resolvedModule);
 
@@ -56,7 +57,7 @@ export default async function resolveImports(module, root = true) {
 
           const graph = await resolveImports(resolvedModule, false);
 
-          if (graph) {
+          if (graph?.length > 0) {
             graph.forEach((module) => modules.push(module));
           }
         }
