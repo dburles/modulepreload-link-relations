@@ -10,10 +10,10 @@ const cache = new Map();
  * @returns An array containing paths to modules that can be preloaded, or otherwise `undefined`.
  */
 export default async function resolveImportsCached(module) {
-  /** @type {Array<string>} */
+  /** @type {Array<string> | undefined} */
   const paths = cache.get(module);
 
-  if (paths) {
+  if (paths !== undefined) {
     return paths;
   } else {
     const graph = await resolveImports(module);
