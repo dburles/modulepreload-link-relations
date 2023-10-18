@@ -8,7 +8,7 @@ import resolveImportsCached from "./resolveImportsCached.mjs";
  * @param {object} options Options.
  * @param {string} options.appPath The path to the application root from where files can be read.
  * @param {string} options.url The module URL to resolve.
- * @returns An array containing relative paths to modules that can be preloaded.
+ * @returns An array containing relative paths to modules that can be preloaded, or otherwise `undefined`.
  */
 export default async function resolveLinkRelations({ appPath, url }) {
   const rootPath = path.resolve(appPath);
