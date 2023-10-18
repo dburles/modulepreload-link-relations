@@ -2,6 +2,10 @@
 
 import resolveImports from "./resolveImports.mjs";
 
+/**
+ * A cache for resolved imports.
+ * @type {Map<string, Array<string>>}
+ */
 const cache = new Map();
 
 /**
@@ -10,7 +14,6 @@ const cache = new Map();
  * @returns An array containing paths to modules that can be preloaded, or otherwise `undefined`.
  */
 export default async function resolveImportsCached(module) {
-  /** @type {Array<string> | undefined} */
   const paths = cache.get(module);
 
   if (paths !== undefined) {
