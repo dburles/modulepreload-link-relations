@@ -1,3 +1,1 @@
-const message = "Hello World";
-
-export default message;
+import "./missing-import.mjs";
