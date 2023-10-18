@@ -1,3 +1,5 @@
+// @ts-check
+
 import test from "node:test";
 import assert from "node:assert/strict";
 import resolveLinkRelations from "./resolveLinkRelations.mjs";
@@ -8,6 +10,8 @@ test("resolveLinkRelations", async (t) => {
       appPath: "test-fixtures",
       url: "/a.mjs",
     });
+
+    assert.ok(Array.isArray(resolvedModules));
 
     assert.ok(resolvedModules.includes("/c.mjs"));
     assert.ok(resolvedModules.includes("/d.mjs"));
@@ -22,6 +26,8 @@ test("resolveLinkRelations", async (t) => {
       appPath: "test-fixtures",
       url: "/a.mjs",
     });
+
+    assert.ok(Array.isArray(resolvedModulesCached));
 
     assert.ok(resolvedModulesCached.includes("/c.mjs"));
     assert.ok(resolvedModulesCached.includes("/d.mjs"));
