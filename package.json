@@ -1,6 +1,6 @@
 {
   "name": "modulepreload-link-relations",
-  "version": "2.0.0",
+  "version": "3.0.0-rc.4",
   "description": "Utility for generating modulepreload link relations based on a JavaScript module import graph.",
   "repository": {
     "type": "git",
@@ -15,19 +15,17 @@
   "author": "David Burles",
   "license": "MIT",
   "engines": {
-    "node": ">= 18"
+    "node": ">= 20"
   },
   "files": [
+    "createResolveLinkRelations.mjs",
     "formatLinkHeaderRelation.mjs",
-    "formatLinkHeaderRelations.mjs",
-    "resolveImports.mjs",
-    "resolveImportsCached.mjs",
-    "resolveLinkRelations.mjs"
+    "formatLinkHeaderRelations.mjs"
   ],
   "exports": {
+    "./createResolveLinkRelations.mjs": "./createResolveLinkRelations.mjs",
     "./formatLinkHeaderRelations.mjs": "./formatLinkHeaderRelations.mjs",
-    "./package.json": "./package.json",
-    "./resolveLinkRelations.mjs": "./resolveLinkRelations.mjs"
+    "./package.json": "./package.json"
   },
   "scripts": {
     "eslint": "eslint .",
