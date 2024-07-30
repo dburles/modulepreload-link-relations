@@ -6,9 +6,7 @@ import createResolveLinkRelations from "./createResolveLinkRelations.mjs";
 
 test("createResolveLinkRelations", async (t) => {
   await t.test("works", async () => {
-    const resolveLinkRelations = createResolveLinkRelations({
-      appPath: "test-fixtures",
-    });
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
     const resolvedModules = await resolveLinkRelations("/a.mjs");
 
     assert.ok(Array.isArray(resolvedModules));
@@ -37,27 +35,21 @@ test("createResolveLinkRelations", async (t) => {
   });
 
   await t.test("can't reach outside of appPath", async () => {
-    const resolveLinkRelations = createResolveLinkRelations({
-      appPath: "test-fixtures",
-    });
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
     const resolvedModules = await resolveLinkRelations("../../a.mjs");
 
     assert.equal(resolvedModules, undefined);
   });
 
   await t.test("module without imports", async () => {
-    const resolveLinkRelations = createResolveLinkRelations({
-      appPath: "test-fixtures",
-    });
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
     const resolvedModules = await resolveLinkRelations("/d.mjs");
 
     assert.equal(resolvedModules, undefined);
   });
 
   await t.test("module doesn't exist", async () => {
-    const resolveLinkRelations = createResolveLinkRelations({
-      appPath: "test-fixtures",
-    });
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
     const resolvedModules = await resolveLinkRelations("/does-not-exist.mjs");
 
     assert.equal(resolvedModules, undefined);
@@ -65,8 +57,7 @@ test("createResolveLinkRelations", async (t) => {
 
   await t.test("resolve import maps", async (tt) => {
     await tt.test("basic", async () => {
-      const resolveLinkRelations = createResolveLinkRelations({
-        appPath: "test-fixtures",
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures", {
         importMap: '{ "imports": { "g": "./g.mjs" } }',
       });
       const resolvedModules = await resolveLinkRelations("/e.mjs");
@@ -77,8 +68,7 @@ test("createResolveLinkRelations", async (t) => {
     });
 
     await tt.test("ignores external urls", async () => {
-      const resolveLinkRelations = createResolveLinkRelations({
-        appPath: "test-fixtures",
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures", {
         importMap:
           '{ "imports": { "z": "/z.mjs", "foo": "https://foo.com/bar" } }',
       });
@@ -109,8 +99,7 @@ test("createResolveLinkRelations", async (t) => {
       },
     };
 
-    const resolveLinkRelations = createResolveLinkRelations({
-      appPath: "test-fixtures",
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures", {
       cache: asyncCache,
     });
     const resolvedModules = await resolveLinkRelations("/a.mjs");

@@ -17,7 +17,7 @@ npm i modulepreload-link-relations
 This package exports two functions:
 
 - `createResolveLinkRelations`
-  - Returns a function that returns an array of modules that can be preloaded for a module. An in-memory cache persists the resulting module import graph.
+  - Returns a function that returns an array of modules that can be preloaded for a specified module. An in-memory cache persists the resulting module import graph.
 - `formatLinkHeaderRelations`
   - A formatter that can be used to generate link relations for an HTTP [Link](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link) entity-header.
 
@@ -27,17 +27,10 @@ This package exports two functions:
 import createResolveLinkRelations from "modulepreload-link-relations/createResolveLinkRelations.mjs";
 import formatLinkHeaderRelations from "modulepreload-link-relations/formatLinkHeaderRelations.mjs";
 
-const resolveLinkRelations = createResolveLinkRelations({
-  // The application path.
-  appPath: "./app",
-  // Optionally provide an import map:
-  // importMap: importMapString,
-  // Optional Map or async Map-like cache:
-  // cache: new Map()
-});
+const resolveLinkRelations = createResolveLinkRelations("./app");
 const linkRelations = await resolveLinkRelations(
   // The requested module.
-  "/lib/a.js", // a.js imports b.js, b.js imports c.js, c.js imports d.js
+  "/lib/a.js", // (a.js imports b.js, b.js imports c.js, c.js imports d.js)
 ); // => ['/lib/c.js', '/lib/d.js'] // Direct imports aren't included in the result.
 
 // Optionally format the result:
@@ -50,3 +43,12 @@ Middleware is available for the following Node.js servers:
 
 - Express - [modulepreload-express](https://github.com/dburles/modulepreload-express)
 - Koa - [modulepreload-koa](https://github.com/dburles/modulepreload-koa)
+
+## API
+
+### `createResolveLinkRelations(path[, options])`
+
+- `path` [&lt;string&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Path to the application root directory, eg "./app".
+- `options` [&lt;Object&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
+  - `importMap` [&lt;string&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Import map string.
+  - `cache` [&lt;Object&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) A custom (map-like) cache.

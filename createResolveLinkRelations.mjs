@@ -146,17 +146,16 @@ async function resolveImportsCached(module, { cache, url, parsedImportMap }) {
 
 /**
  * Creates a function that resolves the link relations for a given module URL.
- * @param {object} options Options.
- * @param {string} options.appPath The path to the application root from where files can be read.
+ * @param {string} appPath Path to the application root from where files can be read.
+ * @param {object} [options] Options.
  * @param {string} [options.importMap] An import map.
  * @param {AsyncMapLike} [options.cache] Specify a cache for resolved imports.
  * @returns A function that resolves the link relations for a given module URL.
  */
-export default function createResolveLinkRelations({
+export default function createResolveLinkRelations(
   appPath,
-  importMap: importMapString,
-  cache = new Map(),
-}) {
+  { importMap: importMapString, cache = new Map() } = {},
+) {
   /**
    * Resolves link relations for a given URL.
    * @param {string} url The module URL to resolve.
