@@ -36,8 +36,9 @@
     "unit": "node --test --test-reporter=spec --experimental-test-coverage"
   },
   "devDependencies": {
-    "eslint": "^8.50.0",
     "@types/node": "^22.0.0",
+    "eslint": "^9.8.0",
+    "globals": "^15.8.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

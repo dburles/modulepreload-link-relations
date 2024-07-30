@@ -27,7 +27,7 @@ const DUMMY_HOSTNAME = "example.com";
 async function tryReadFile(filePath) {
   try {
     return await readFile(filePath, "utf-8");
-  } catch (error) {
+  } catch {
     // Do nothing.
   }
 }
@@ -41,7 +41,7 @@ async function exists(filePath) {
   try {
     await access(filePath);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

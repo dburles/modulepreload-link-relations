@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import assert from "node:assert/strict";
 import tryURLLikeSpecifierParse from "./tryURLLikeSpecifierParse.mjs";
 import tryURLParse from "./tryURLParse.mjs";
