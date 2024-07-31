@@ -48,7 +48,7 @@ Middleware is available for the following Node.js servers:
 
 ### `createResolveLinkRelations(path[, options])`
 
-- `path` [&lt;string&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Path to the application root directory, eg "./app".
-- `options` [&lt;Object&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
-  - `importMap` [&lt;string&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Import map string.
-  - `cache` [&lt;Object&gt;](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) A custom (map-like) cache.
+- `path` {string} Path to the application root directory, eg "./app".
+- `options` {Object}
+  - `importMap` {string} Import map string.
+  - `cache` {Object} A custom (map-like) cache.
