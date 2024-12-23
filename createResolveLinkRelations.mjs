@@ -143,7 +143,7 @@ async function resolveImportsCached(module, { cache, url, parsedImportMap }) {
   if (paths) {
     return paths;
   } else {
-    const graph = await resolveImports(module, { url, parsedImportMap });
+    const graph = await resolveImports(module, { parsedImportMap, url });
 
     if (graph.length > 0) {
       await cache.set(module, graph);
