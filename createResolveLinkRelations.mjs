@@ -113,7 +113,7 @@ async function resolveImports(module, { url, parsedImportMap }, root = true) {
 
           const graph = await resolveImports(
             resolvedModule,
-            { url, parsedImportMap },
+            { parsedImportMap, url },
             false,
           );
 
@@ -130,7 +130,7 @@ async function resolveImports(module, { url, parsedImportMap }, root = true) {
 
 /**
  * Resolves the imports for a given module and caches the result.
- * @param {string} module The module URL to resolve.
+ * @param {string} module The path to the module.
  * @param {object} options Options.
  * @param {AsyncMapLike} options.cache Resolved imports cache.
  * @param {string} options.url The module URL to resolve.
@@ -143,10 +143,7 @@ async function resolveImportsCached(module, { cache, url, parsedImportMap }) {
   if (paths) {
     return paths;
   } else {
-    const graph = await resolveImports(module, {
-      url,
-      parsedImportMap,
-    });
+    const graph = await resolveImports(module, { url, parsedImportMap });
 
     if (graph.length > 0) {
       await cache.set(module, graph);
