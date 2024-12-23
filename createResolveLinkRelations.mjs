@@ -47,6 +47,31 @@ async function exists(filePath) {
 }
 
 /**
+ * Takes a specifier and resolves through an import map.
+ * @param {string} specifier Import specifier.
+ * @param {object} options Options.
+ * @param {string} options.url The module URL to resolve.
+ * @param {object} [options.parsedImportMap] A parsed import map.
+ */
+function resolveSpecifier(specifier, { url, parsedImportMap }) {
+  // If an import map is supplied, everything resolves through it.
+  if (parsedImportMap) {
+    const importMapResolved = resolveImportMap(
+      specifier,
+      parsedImportMap,
+      new URL(url, `https://${DUMMY_HOSTNAME}`),
+    );
+
+    if (importMapResolved.hostname === DUMMY_HOSTNAME) {
+      // It will match if it's a local module.
+      return "." + importMapResolved.pathname;
+    }
+  }
+
+  return specifier;
+}
+
+/**
  * Recursively parses and resolves a module's imports.
  * @param {string} module The path to the module.
  * @param {object} options Options.
@@ -71,31 +96,14 @@ async function resolveImports(module, { url, parsedImportMap }, root = true) {
     imports.map(async ({ n: specifier, d }) => {
       const dynamic = d > -1;
       if (specifier && !dynamic) {
-        let importMapResolved = null;
-
-        // If an import map is supplied, everything resolves through it.
-        if (parsedImportMap) {
-          importMapResolved = resolveImportMap(
-            specifier,
-            parsedImportMap,
-            new URL(url, `https://${DUMMY_HOSTNAME}`),
-          );
-        }
-
-        let resolvedModule;
-
-        // Are we resolving with an import map?
-        if (importMapResolved !== null) {
-          // It will match if it's a local module.
-          if (importMapResolved.hostname === DUMMY_HOSTNAME) {
-            resolvedModule = path.resolve(
-              path.dirname(module),
-              `.${importMapResolved.pathname}`,
-            );
-          }
-        } else {
-          resolvedModule = path.resolve(path.dirname(module), specifier);
-        }
+        const resolvedSpecifier = resolveSpecifier(specifier, {
+          url,
+          parsedImportMap,
+        });
+        const resolvedModule = path.resolve(
+          path.dirname(module),
+          resolvedSpecifier,
+        );
 
         // If the module has resolved to a local file (and it exists), then it's preloadable.
         if (resolvedModule && (await exists(resolvedModule))) {
@@ -172,23 +180,23 @@ export default function createResolveLinkRelations(
     }
 
     const rootPath = path.resolve(appPath);
-    const resolvedFile = path.join(rootPath, url);
 
-    if (resolvedFile.startsWith(rootPath)) {
-      const modules = await resolveImportsCached(resolvedFile, {
-        cache,
-        url,
-        parsedImportMap,
+    const resolvedSpecifier = resolveSpecifier(url, { url, parsedImportMap });
+    const resolvedModule = path.join(rootPath, resolvedSpecifier);
+
+    const modules = await resolveImportsCached(resolvedModule, {
+      cache,
+      url: resolvedSpecifier,
+      parsedImportMap,
+    });
+
+    if (Array.isArray(modules) && modules.length > 0) {
+      const resolvedModules = modules.map((module) => {
+        return "/" + path.relative(rootPath, module);
       });
 
-      if (Array.isArray(modules) && modules.length > 0) {
-        const resolvedModules = modules.map((module) => {
-          return "/" + path.relative(rootPath, module);
-        });
-
-        if (resolvedModules.length > 0) {
-          return resolvedModules;
-        }
+      if (resolvedModules.length > 0) {
+        return resolvedModules;
       }
     }
   };

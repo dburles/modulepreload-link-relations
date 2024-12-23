@@ -78,6 +78,17 @@ test("createResolveLinkRelations", async (t) => {
 
       assert.ok(resolvedModules.includes("/z.mjs"));
     });
+
+    await tt.test("resolves root module", async () => {
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures", {
+        importMap: '{ "imports": { "e": "./e.mjs", "g": "./g.mjs" } }',
+      });
+      const resolvedModules = await resolveLinkRelations("e");
+
+      assert.ok(Array.isArray(resolvedModules));
+
+      assert.ok(resolvedModules.includes("/g.mjs"));
+    });
   });
 
   await t.test("async cache", async () => {
