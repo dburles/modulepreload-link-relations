@@ -99,9 +99,16 @@ async function resolveImports(
   module,
   { url, parsedImportMap, resolveSpecifierOverride, rootPath },
   root = true,
+  visited = new Set(),
 ) {
   /** @type {Array<string>} */
   let modules = [];
+
+  if (visited.has(module)) {
+    return modules;
+  }
+
+  visited.add(module);
 
   const source = await tryReadFile(module);
 
@@ -144,6 +151,7 @@ async function resolveImports(
               rootPath,
             },
             false,
+            visited,
           );
 
           if (graph.length > 0) {
