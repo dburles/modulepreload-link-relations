@@ -14,6 +14,8 @@ import resolveImportMap from "./resolve-import-map/resolveImportMap.mjs";
 
 /** @typedef {Map<any, any> | AsyncMap} AsyncMapLike */
 
+/** @typedef {(specifier: string) => string} ResolveSpecifier */
+
 // The import map parser requries a base url. We don't require one for our purposes,
 // but it allows us to use the parser without modifying the source. One quirk is that it will try map
 // this url to files locally if it's specified, but no one should do that.
@@ -47,17 +49,66 @@ async function exists(filePath) {
 }
 
 /**
+ * Takes a specifier and resolves through an import map.
+ * @param {string} specifier Import specifier.
+ * @param {object} options Options.
+ * @param {string} options.url The module URL to resolve.
+ * @param {object} [options.parsedImportMap] A parsed import map.
+ * @param {ResolveSpecifier} [options.resolveSpecifierOverride] Override specifier resolution.
+ */
+function resolveSpecifier(
+  specifier,
+  { url, parsedImportMap, resolveSpecifierOverride = (x) => x },
+) {
+  // If an import map is supplied, everything resolves through it.
+  if (parsedImportMap) {
+    const importMapResolved = resolveImportMap(
+      specifier,
+      parsedImportMap,
+      new URL(url, `https://${DUMMY_HOSTNAME}`),
+    );
+
+    if (importMapResolved.hostname === DUMMY_HOSTNAME) {
+      // It will match if it's a local module.
+      return {
+        importMap: true,
+        importMapResolved,
+        specifier: resolveSpecifierOverride(importMapResolved.pathname),
+      };
+    }
+  }
+
+  return {
+    importMap: false,
+    specifier: resolveSpecifierOverride(specifier),
+  };
+}
+
+/**
  * Recursively parses and resolves a module's imports.
  * @param {string} module The path to the module.
  * @param {object} options Options.
  * @param {string} options.url The module URL to resolve.
  * @param {object} [options.parsedImportMap] A parsed import map.
+ * @param {ResolveSpecifier} [options.resolveSpecifierOverride] Override specifier resolution.
+ * @param {string} options.rootPath The absolute path to the specified application root.
  * @param {boolean} [root] Whether the module is the root module.
- * @returns An array containing paths to modules that can be preloaded.
+ * @returns {Promise<Set<string>>} A `Set` containing paths to modules that can be preloaded, or otherwise `undefined`.
  */
-async function resolveImports(module, { url, parsedImportMap }, root = true) {
-  /** @type {Array<string>} */
-  let modules = [];
+async function resolveImports(
+  module,
+  { url, parsedImportMap, resolveSpecifierOverride, rootPath },
+  root = true,
+  visited = new Set(),
+) {
+  /** @type {Set<string>} */
+  const modules = new Set();
+
+  if (visited.has(module)) {
+    return modules;
+  }
+
+  visited.add(module);
 
   const source = await tryReadFile(module);
 
@@ -71,46 +122,40 @@ async function resolveImports(module, { url, parsedImportMap }, root = true) {
     imports.map(async ({ n: specifier, d }) => {
       const dynamic = d > -1;
       if (specifier && !dynamic) {
-        let importMapResolved = null;
-
-        // If an import map is supplied, everything resolves through it.
-        if (parsedImportMap) {
-          importMapResolved = resolveImportMap(
-            specifier,
-            parsedImportMap,
-            new URL(url, `https://${DUMMY_HOSTNAME}`),
-          );
-        }
-
-        let resolvedModule;
-
-        // Are we resolving with an import map?
-        if (importMapResolved !== null) {
-          // It will match if it's a local module.
-          if (importMapResolved.hostname === DUMMY_HOSTNAME) {
-            resolvedModule = path.resolve(
-              path.dirname(module),
-              `.${importMapResolved.pathname}`,
-            );
-          }
-        } else {
-          resolvedModule = path.resolve(path.dirname(module), specifier);
-        }
+        const resolvedSpecifier = resolveSpecifier(specifier, {
+          url,
+          parsedImportMap,
+          resolveSpecifierOverride,
+        });
+        const resolvedModule = path.join(
+          resolvedSpecifier.importMap ? rootPath : path.dirname(module),
+          resolvedSpecifier.specifier,
+        );
 
         // If the module has resolved to a local file (and it exists), then it's preloadable.
-        if (resolvedModule && (await exists(resolvedModule))) {
+        if (
+          resolvedModule &&
+          resolvedModule.startsWith(rootPath) &&
+          (await exists(resolvedModule))
+        ) {
           if (!root) {
-            modules.push(resolvedModule);
+            modules.add(resolvedModule);
           }
 
           const graph = await resolveImports(
             resolvedModule,
-            { parsedImportMap, url },
+            {
+              parsedImportMap,
+              url: resolvedSpecifier.importMapResolved?.pathname || url,
+              resolveSpecifierOverride,
+              rootPath,
+            },
             false,
+            visited,
           );
 
-          if (graph.length > 0) {
-            graph.forEach((module) => modules.push(module));
+          if (graph.size > 0) {
+            graph.forEach((module) => modules.add(module));
           }
         }
       }
@@ -127,17 +172,27 @@ async function resolveImports(module, { url, parsedImportMap }, root = true) {
  * @param {AsyncMapLike} options.cache Resolved imports cache.
  * @param {string} options.url The module URL to resolve.
  * @param {object} [options.parsedImportMap] A parsed import map.
- * @returns An array containing paths to modules that can be preloaded, or otherwise `undefined`.
+ * @param {ResolveSpecifier} [options.resolveSpecifierOverride] Override specifier resolution.
+ * @param {string} options.rootPath The absolute path to the specified application root.
+ * @returns {Promise<Set<string> | undefined>} A `Set` containing paths to modules that can be preloaded, or otherwise `undefined`.
  */
-async function resolveImportsCached(module, { cache, url, parsedImportMap }) {
+async function resolveImportsCached(
+  module,
+  { cache, url, parsedImportMap, resolveSpecifierOverride, rootPath },
+) {
   const paths = await cache.get(module);
 
   if (paths) {
     return paths;
   } else {
-    const graph = await resolveImports(module, { parsedImportMap, url });
+    const graph = await resolveImports(module, {
+      parsedImportMap,
+      url,
+      resolveSpecifierOverride,
+      rootPath,
+    });
 
-    if (graph.length > 0) {
+    if (graph.size > 0) {
       await cache.set(module, graph);
       return graph;
     }
@@ -156,33 +211,46 @@ export default function createResolveLinkRelations(
   appPath,
   { importMap: importMapString, cache = new Map() } = {},
 ) {
+  /** @type {object} */
+  let parsedImportMap;
+
+  if (importMapString !== undefined) {
+    parsedImportMap = parseFromString(
+      importMapString,
+      `https://${DUMMY_HOSTNAME}`,
+    );
+  }
+
   /**
    * Resolves link relations for a given URL.
    * @param {string} url The module URL to resolve.
-   * @returns An array containing relative paths to modules that can be preloaded, or otherwise `undefined`.
+   * @param {object} [options] Options.
+   * @param {ResolveSpecifier} [options.resolveSpecifier] Override specifier resolution.
+   * @returns {Promise<Array<string> | undefined>} An array containing relative paths to modules that can be preloaded, or otherwise `undefined`.
    */
-  return async function resolveLinkRelations(url) {
-    let parsedImportMap;
-
-    if (importMapString !== undefined) {
-      parsedImportMap = parseFromString(
-        importMapString,
-        `https://${DUMMY_HOSTNAME}`,
-      );
-    }
-
+  return async function resolveLinkRelations(
+    url,
+    { resolveSpecifier: resolveSpecifierOverride } = {},
+  ) {
     const rootPath = path.resolve(appPath);
-    const resolvedFile = path.join(rootPath, url);
+    const resolvedSpecifier = resolveSpecifier(url, {
+      url,
+      parsedImportMap,
+      resolveSpecifierOverride,
+    });
+    const resolvedModule = path.join(rootPath, resolvedSpecifier.specifier);
 
-    if (resolvedFile.startsWith(rootPath)) {
-      const modules = await resolveImportsCached(resolvedFile, {
+    if (resolvedModule.startsWith(rootPath)) {
+      const modules = await resolveImportsCached(resolvedModule, {
         cache,
         url,
         parsedImportMap,
+        resolveSpecifierOverride,
+        rootPath,
       });
 
-      if (Array.isArray(modules) && modules.length > 0) {
-        const resolvedModules = modules.map((module) => {
+      if (modules && modules.size > 0) {
+        const resolvedModules = Array.from(modules).map((module) => {
           return "/" + path.relative(rootPath, module);
         });
 

@@ -34,11 +34,20 @@ test("createResolveLinkRelations", async (t) => {
     assert.equal(resolvedModulesCached.length, 4);
   });
 
-  await t.test("can't reach outside of appPath", async () => {
-    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
-    const resolvedModules = await resolveLinkRelations("../../a.mjs");
+  await t.test("can't reach outside of appPath", async (tt) => {
+    await tt.test("root module", async () => {
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
+      const resolvedModules = await resolveLinkRelations("../../a.mjs");
 
-    assert.equal(resolvedModules, undefined);
+      assert.equal(resolvedModules, undefined);
+    });
+
+    await tt.test("imports", async () => {
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
+      const resolvedModules = await resolveLinkRelations("./outside.mjs");
+
+      assert.equal(resolvedModules, undefined);
+    });
   });
 
   await t.test("module without imports", async () => {
@@ -77,6 +86,17 @@ test("createResolveLinkRelations", async (t) => {
       assert.ok(Array.isArray(resolvedModules));
 
       assert.ok(resolvedModules.includes("/z.mjs"));
+    });
+
+    await tt.test("resolves root module", async () => {
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures", {
+        importMap: '{ "imports": { "e": "./e.mjs", "g": "./g.mjs" } }',
+      });
+      const resolvedModules = await resolveLinkRelations("e");
+
+      assert.ok(Array.isArray(resolvedModules));
+
+      assert.ok(resolvedModules.includes("/g.mjs"));
     });
   });
 
@@ -127,5 +147,27 @@ test("createResolveLinkRelations", async (t) => {
     assert.ok(!resolvedModulesCached.includes("/lib/cc.mjs"));
 
     assert.equal(resolvedModulesCached.length, 4);
+  });
+
+  await t.test("no duplicates", async () => {
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
+    const resolvedModules = await resolveLinkRelations("/a.mjs");
+
+    assert.ok(Array.isArray(resolvedModules));
+  });
+
+  await t.test("resolveSpecifier", async (tt) => {
+    await tt.test("basic", async () => {
+      const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
+      const resolvedModules = await resolveLinkRelations("/a.mjs", {
+        resolveSpecifier(specifier) {
+          return specifier.replace("/a", "/b");
+        },
+      });
+
+      assert.ok(Array.isArray(resolvedModules));
+
+      assert.ok(resolvedModules.includes("/d.mjs"));
+    });
   });
 });
