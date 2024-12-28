@@ -93,7 +93,7 @@ function resolveSpecifier(
  * @param {ResolveSpecifier} [options.resolveSpecifierOverride] Override specifier resolution.
  * @param {string} options.rootPath The absolute path to the specified application root.
  * @param {boolean} [root] Whether the module is the root module.
- * @returns An array containing paths to modules that can be preloaded.
+ * @returns {Promise<Set<string>>} A `Set` containing paths to modules that can be preloaded, or otherwise `undefined`.
  */
 async function resolveImports(
   module,
@@ -101,8 +101,8 @@ async function resolveImports(
   root = true,
   visited = new Set(),
 ) {
-  /** @type {Array<string>} */
-  let modules = [];
+  /** @type {Set<string>} */
+  const modules = new Set();
 
   if (visited.has(module)) {
     return modules;
@@ -139,7 +139,7 @@ async function resolveImports(
           (await exists(resolvedModule))
         ) {
           if (!root) {
-            modules.push(resolvedModule);
+            modules.add(resolvedModule);
           }
 
           const graph = await resolveImports(
@@ -154,8 +154,8 @@ async function resolveImports(
             visited,
           );
 
-          if (graph.length > 0) {
-            graph.forEach((module) => modules.push(module));
+          if (graph.size > 0) {
+            graph.forEach((module) => modules.add(module));
           }
         }
       }
@@ -174,7 +174,7 @@ async function resolveImports(
  * @param {object} [options.parsedImportMap] A parsed import map.
  * @param {ResolveSpecifier} [options.resolveSpecifierOverride] Override specifier resolution.
  * @param {string} options.rootPath The absolute path to the specified application root.
- * @returns An array containing paths to modules that can be preloaded, or otherwise `undefined`.
+ * @returns {Promise<Set<string> | undefined>} A `Set` containing paths to modules that can be preloaded, or otherwise `undefined`.
  */
 async function resolveImportsCached(
   module,
@@ -192,7 +192,7 @@ async function resolveImportsCached(
       rootPath,
     });
 
-    if (graph.length > 0) {
+    if (graph.size > 0) {
       await cache.set(module, graph);
       return graph;
     }
@@ -226,14 +226,13 @@ export default function createResolveLinkRelations(
    * @param {string} url The module URL to resolve.
    * @param {object} [options] Options.
    * @param {ResolveSpecifier} [options.resolveSpecifier] Override specifier resolution.
-   * @returns An array containing relative paths to modules that can be preloaded, or otherwise `undefined`.
+   * @returns {Promise<Array<string> | undefined>} An array containing relative paths to modules that can be preloaded, or otherwise `undefined`.
    */
   return async function resolveLinkRelations(
     url,
     { resolveSpecifier: resolveSpecifierOverride } = {},
   ) {
     const rootPath = path.resolve(appPath);
-
     const resolvedSpecifier = resolveSpecifier(url, {
       url,
       parsedImportMap,
@@ -250,8 +249,8 @@ export default function createResolveLinkRelations(
         rootPath,
       });
 
-      if (Array.isArray(modules) && modules.length > 0) {
-        const resolvedModules = modules.map((module) => {
+      if (modules && modules.size > 0) {
+        const resolvedModules = Array.from(modules).map((module) => {
           return "/" + path.relative(rootPath, module);
         });
 

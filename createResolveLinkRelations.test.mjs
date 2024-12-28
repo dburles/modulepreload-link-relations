@@ -149,6 +149,13 @@ test("createResolveLinkRelations", async (t) => {
     assert.equal(resolvedModulesCached.length, 4);
   });
 
+  await t.test("no duplicates", async () => {
+    const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
+    const resolvedModules = await resolveLinkRelations("/a.mjs");
+
+    assert.ok(Array.isArray(resolvedModules));
+  });
+
   await t.test("resolveSpecifier", async (tt) => {
     await tt.test("basic", async () => {
       const resolveLinkRelations = createResolveLinkRelations("test-fixtures");
