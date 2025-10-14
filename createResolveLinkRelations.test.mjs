@@ -154,6 +154,13 @@ test("createResolveLinkRelations", async (t) => {
     const resolvedModules = await resolveLinkRelations("/a.mjs");
 
     assert.ok(Array.isArray(resolvedModules));
+
+    assert.equal(resolvedModules.length, 4);
+
+    assert.ok(resolvedModules.includes("/c.mjs"));
+    assert.ok(resolvedModules.includes("/d.mjs"));
+    assert.ok(resolvedModules.includes("/lib/aa.mjs"));
+    assert.ok(resolvedModules.includes("/lib/bb.mjs"));
   });
 
   await t.test("resolveSpecifier", async (tt) => {
